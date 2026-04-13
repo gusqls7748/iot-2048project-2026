@@ -5,6 +5,7 @@ main.cpp: 게임 루프 (입력 받기 -> 로직 실행 -> 화면 출력).
 
 GameManager.h / .cpp: 보드 데이터(4x4 배열), 숫자 생성, 이동 알고리즘(Move/Merge) 로직.
 
+
 Renderer.h / .cpp: 콘솔 화면 지우기 및 컬러풀한 보드 출력.
 
 ### Tech Stack: 기술 스택 요약
