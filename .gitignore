@@ -39,3 +39,20 @@
 
 # debug information files
 *.dwo
+
+# Visual Studio 임시 파일 및 설정
+.vs/
+[Dd]ebug/
+[Rr]elease/
+*.user
+*.aps
+*.pdb
+
+# 빌드 결과물
+*.exe
+*.obj
+*.log
+
+# DB 임시 파일 (작성하신 코드에서 생성되는 파일들)
+best.txt
+rank.txt

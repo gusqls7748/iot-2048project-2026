@@ -1,1 +1,6 @@
-﻿  2048gameproject.vcxproj -> C:\SourceBank\iot-2048project-2026\2048gameproject\x64\Debug\2048gameproject.exe
+﻿  board.cpp
+  main.cpp
+C:\SourceBank\iot-2048project-2026\2048gameproject\2048gameproject\main.cpp(115,35): warning C4244: '초기화 중': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\SourceBank\iot-2048project-2026\2048gameproject\2048gameproject\main.cpp(116,35): warning C4244: '초기화 중': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+  코드를 생성하고 있습니다...
+  2048gameproject.vcxproj -> C:\SourceBank\iot-2048project-2026\2048gameproject\x64\Debug\2048gameproject.exe

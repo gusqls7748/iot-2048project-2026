@@ -1,3 +1,4 @@
+#define _CRT_SECURE_NO_WARNINGS // 1순위로 작성
 #include <iostream>
 #include "Board.h"
 #include <cstdlib> // rand() 사용
@@ -8,6 +9,7 @@ Board::Board() {
 	init();
 }
 
+// [초기화] 점수 리셋, 보드 비우기, 첫 숫자 2개 생성
 void Board::init() {
 	score = 0;
 	for (int i = 0; i < 4; i++)
@@ -46,7 +48,7 @@ void Board::spawn() {
 	}
 }
 
-// 게임 오버 판전
+// [게임 종료 판정] 빈 칸이 없고, 상하좌우 인접한 칸 중 합칠 수 있는 게 없으면 종료
 bool Board::isGameOver() {
 	// 1. 빈칸이 있는지 확인
 	for (int i = 0; i < 4; i++) {
@@ -59,14 +61,14 @@ bool Board::isGameOver() {
 	// 2. 가로로 인접한 칸 중 합칠 수 있는지 확인
 	for (int i = 0; i < 4; i++) {
 		for (int j = 0; j < 3; j++) {
-			if (grid[i][j] == grid[i][j + 1]) return false;
+			if (grid[i][j] == grid[i][j + 1]) return false; // 가로 병합 가능
 		}
 	}
 
 	// 3. 새로로 인접한 칸 중 합칠 수 있는지 확인
 	for (int i = 0; i < 3; i++) {
 		for (int j = 0; j < 4; j++) {
-			if (grid[i][j] == grid[i + 1][j]) return false;
+			if (grid[i][j] == grid[i + 1][j]) return false; // 세로 병합 가능
 		}
 	}
 
@@ -76,7 +78,7 @@ bool Board::isGameOver() {
 }
 
 
-// 이동 로직: 왼쪽(Left) 예시
+// [이동 로직] 타일을 밀고 같은 숫자를 합침 (방향별 역순 탐색 적용)
 bool Board::move(int dir) {
 	bool moved = false;
 
@@ -188,7 +190,7 @@ bool Board::move(int dir) {
 	// 4. 오른쪽(right)으로 밀기
 	else if (dir == 3) { 
 		for (int i = 0; i < 4; i++) { // 각 행별로 검사
-			int target = 3; // 숫자가 도착하거나 합쳐질 수 있는 '기준점'
+			int target = 3; // 숫자가 채워질 수 있는 가장 오른쪽 목표 지점
 
 			for (int j = 2; j >= 0; j--) { // 2번째 행(index 1)부터 아래로 내려가며 검사
 				if (grid[i][j] == 0) continue; // 위쪽으로 옮길 숫자가 없으면 패스
@@ -204,7 +206,7 @@ bool Board::move(int dir) {
 				}
 
 				// 2. 밀고 난 후, 앞 칸의 숫자와 내 숫자가 같다면 합치기
-				if (current > target && grid[i][current + 1] == grid[i][current]) {
+				if (current < target && grid[i][current + 1] == grid[i][current]) {
 					grid[i][current + 1] *= 2;				 // 숫자를 2배로 (합치기)
 					score += grid[i][current + 1];			 // 점수 추가
 					grid[i][current] = 0;					 // 합쳐졌으니 내 자리는 비움
@@ -224,6 +226,7 @@ bool Board::move(int dir) {
 	return moved;
 }
 
+// [DB 연동] MySQL 명령어를 system 호출로 실행하여 데이터 저장/불러오기
 void Board::saveToDB() {
 	// 1. 비밀번호 설정 (DBeaver와 동일하게)
 	std::string db_pw = "my123456";
@@ -247,4 +250,58 @@ void Board::saveToDB() {
 		std::cout << "[오류] 실행 실패 (코드: " << result << ")" << std::endl;
 		std::cout << "[팁] CMD에서 직접 다음을 실행해보세요: " << full_command << std::endl;
 	}
+}
+
+void Board::reset() {
+	init();
+	std::cout << "[시스템] 게임을 다시 시작합니다! " << std::endl;
+}
+
+// 최고 점수 불러오기
+// Board.cpp
+int Board::getBestScoreFromDB() {
+	int bestScore = 0;
+	std::string db_pw = "my123456";
+
+	// 1. 최고 점수를 조회해서 best.tst파일에 저장하는 명령어
+	std::string sql_query = "SELECT MAX(score) FROM game_results;";
+	std::string full_command = "mysql -u root -p" + db_pw + " game_db -N -e \"" + sql_query + "\" > best.txt";
+
+	// 명령어 실행
+	system(full_command.c_str());
+
+	// 3. 생성된 best.txt 파일 읽기
+	FILE* fp = fopen("best.txt", "r");
+	if (fp) {
+		if (fscanf(fp, "%d", &bestScore) == EOF) {
+			bestScore = 0; // 파일이 비어있으면 0점
+		}
+		fclose(fp);
+	}
+
+	
+	return bestScore;
+}
+
+std::vector<int> Board::getTopScoresFromDB() {
+	std::vector<int> topScores;
+	std::string db_pw = "my123456";
+
+	// 상위 5개 정수만 가져와서 rank.txt저장
+	std::string sql_query = "SELECT score FROM game_results ORDER BY score DESC LIMIT 5;";
+	std::string full_command = "mysql -u root -p" + db_pw + " game_db -N -e \"" + sql_query + "\" > rank.txt";
+
+	system(full_command.c_str());
+
+	//파일 읽기
+	FILE* fp = fopen("rank.txt", "r");
+	if (fp) {
+		int tempScore;
+		while (fscanf(fp, "%d", &tempScore) != EOF) {
+			topScores.push_back(tempScore);
+		}
+		fclose(fp);
+	}
+	return topScores;
+
 }

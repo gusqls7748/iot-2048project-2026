@@ -5,21 +5,27 @@
 
 class Board {
 private:
-	int grid[4][4];	// 배열 
-	int score;		// 변수
-
+    int grid[4][4];    // 4x4 게임판 데이터
+    int score;         // 현재 점수
 
 public:
-	Board();
-	void init();		// 게임초기화 (2개 숫자 생성
-	void spawn();		// 빈공간에 랜덤하게 2또는 4 생성
-	void saveToDB();
-	bool isGameOver();  // 게임 종료 여부 확인
-	bool move(int dir);	// 0:상, 1:하, ::2:좌 3:우
-	
-	//bool canMove();		// 게임 오버 판전
-	int getScore() const { return score;  }
-	int getCell(int r, int c) const { return grid[r][c]; }
+    Board();           // 객체 생성 시 초기화
+    void init();       // 게임 시작 (숫자 2개 생성)
+    void reset();      // 게임 재시작 (판 비우기)
+
+    // 핵심 로직
+    void spawn();      // 빈 칸에 2 또는 4 랜덤 생성
+    bool move(int dir);// 타일 이동 및 합치기 (성공 시 true)
+    bool isGameOver(); // 더 이상 움직일 수 없는지 확인
+
+    // 데이터베이스 연동 (MySQL)
+    void saveToDB();                       // 점수 저장
+    int getBestScoreFromDB();              // 역대 최고 점수 가져오기
+    std::vector<int> getTopScoresFromDB(); // 랭킹 TOP 5 가져오기
+
+    // UI 출력용 데이터 접근 (Getter)
+    int getScore() const { return score; } 
+    int getCell(int r, int c) const { return grid[r][c]; }
 };
 
 #endif
